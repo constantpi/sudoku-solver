@@ -103,10 +103,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   status.textContent = 'loading wasm...';
 
-  // Try common generated pkg names
+  // Try the actual generated pkg name to avoid harmless 404s in the console
   const tryPaths = [
-    '../pkg/sudoku_rust.js',
-    '../pkg/SudokuRust.js',
     '../pkg/sudokurust.js'
   ];
 
@@ -225,8 +223,21 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         beforeFixedCells = Array.from(fixedCells);
       }
 
+      // call wasm solver (returns SolveResult object)
       const out = mod.solve_wasm(input);
-      if (out === undefined || out === null) {
+      // helper: getter may be exported as property or as function
+      const getProp = (obj, name) => {
+        if (!obj) return undefined;
+        const v = obj[name];
+        if (typeof v === 'function') return v.call(obj);
+        return v;
+      };
+
+      const solved = getProp(out, 'solved');
+      const calls = getProp(out, 'call_cnt');
+      const boardVal = getProp(out, 'board');
+
+      if (!solved) {
         result.textContent = '解が見つかりませんでした。';
         // no change, clear saved state
         beforeSolveState = null;
@@ -234,15 +245,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         // re-enable solve if solver returned no solution
         if (solveBtn) solveBtn.disabled = false;
       } else {
-        // if returned a Uint8Array view (or JS array), convert
+        // boardVal should be a Uint8Array or array-like
         let u8;
-        if (out instanceof Uint8Array) u8 = out;
-        else u8 = new Uint8Array(out);
-        // convert 0-8 back to 1-9 for display
+        if (boardVal instanceof Uint8Array) u8 = boardVal;
+        else u8 = new Uint8Array(boardVal);
         // update grid state and render; keep track of which cells were user-input (fixed)
         for (let i=0;i<81;i++){
           const val = (u8[i] === undefined ? 0 : u8[i]);
-          // do not overwrite user-input / fixed cells' fixed status
           if (!fixedCells[i]){
             gridState[i] = val;
           } else {
@@ -254,7 +263,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         if (revertBtn) revertBtn.disabled = false;
         result.textContent = formatOutput(gridState);
       }
-      status.textContent = 'done';
+      // show calls when available
+      if (typeof calls !== 'undefined') {
+        status.textContent = `done (calls: ${calls})`;
+      } else {
+        status.textContent = 'done';
+      }
     } catch (e) {
       console.error(e);
       status.textContent = 'error';
