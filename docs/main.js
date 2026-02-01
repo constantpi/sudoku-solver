@@ -27,7 +27,10 @@ function parseInput(text) {
 
 // Grid state: 81 elements, 0 = empty, 1-9 = digits
 let gridState = new Uint8Array(81);
+let fixedCells = new Array(81).fill(false);
 let selectedIndex = null;
+let beforeSolveState = null;
+let beforeFixedCells = null;
 
 function renderGrid() {
   const grid = document.getElementById('grid');
@@ -43,6 +46,8 @@ function renderGrid() {
     cell.dataset.index = String(i);
     const v = gridState[i];
     cell.textContent = v === 0 ? '' : String(v);
+    if (fixedCells[i]) cell.classList.add('fixed');
+    else if (v !== 0) cell.classList.add('solved');
     cell.addEventListener('click', ()=>{
       selectCell(i);
     });
@@ -68,7 +73,10 @@ function loadInitialFromTextarea(){
   const ta = document.getElementById('puzzle');
   if (!ta) return;
   const arr = parseInput(ta.value);
-  for (let i=0;i<81;i++) gridState[i] = arr[i];
+  for (let i=0;i<81;i++){
+    gridState[i] = arr[i];
+    fixedCells[i] = arr[i] !== 0;
+  }
 }
 
 function formatOutput(u8) {
@@ -84,6 +92,7 @@ function formatOutput(u8) {
 document.addEventListener('DOMContentLoaded', async ()=>{
   const status = document.getElementById('status');
   const solveBtn = document.getElementById('solve');
+  const revertBtn = document.getElementById('revert');
   const clearBtn = document.getElementById('clear');
   const puzzle = document.getElementById('puzzle');
   const result = document.getElementById('result');
@@ -118,11 +127,38 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   loadInitialFromTextarea();
   renderGrid();
 
-  // keyboard handling
+  // keyboard handling: arrow navigation, digits, Esc
   document.addEventListener('keydown', (ev)=>{
     if (selectedIndex === null) return;
+    const row = Math.floor(selectedIndex/9);
+    const col = selectedIndex%9;
+    if (ev.key === 'ArrowLeft'){
+      const nc = col === 0 ? 8 : col-1;
+      selectCell(row*9 + nc);
+      ev.preventDefault();
+      return;
+    }
+    if (ev.key === 'ArrowRight'){
+      const nc = col === 8 ? 0 : col+1;
+      selectCell(row*9 + nc);
+      ev.preventDefault();
+      return;
+    }
+    if (ev.key === 'ArrowUp'){
+      const nr = row === 0 ? 2 : row-1;
+      selectCell(nr*9 + col);
+      ev.preventDefault();
+      return;
+    }
+    if (ev.key === 'ArrowDown'){
+      const nr = row === 8 ? 0 : row+1;
+      selectCell(nr*9 + col);
+      ev.preventDefault();
+      return;
+    }
     if (ev.key === 'Escape'){
       gridState[selectedIndex] = 0;
+      fixedCells[selectedIndex] = false;
       renderGrid();
       selectCell(selectedIndex);
       ev.preventDefault();
@@ -130,6 +166,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }
     if (/^[1-9]$/.test(ev.key)){
       gridState[selectedIndex] = Number(ev.key);
+      fixedCells[selectedIndex] = true; // user input counts as fixed
       renderGrid();
       selectCell(selectedIndex);
       ev.preventDefault();
@@ -139,9 +176,26 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   clearBtn.addEventListener('click', ()=>{
     gridState.fill(0);
+    fixedCells.fill(false);
     renderGrid();
     selectedIndex = null;
+    // disable revert because there's nothing to revert
+    if (revertBtn) revertBtn.disabled = true;
   });
+
+  if (revertBtn) {
+    revertBtn.addEventListener('click', ()=>{
+      if (!beforeSolveState) return;
+      // restore previous state
+      gridState = new Uint8Array(beforeSolveState);
+      fixedCells = beforeFixedCells ? Array.from(beforeFixedCells) : new Array(81).fill(false);
+      renderGrid();
+      // disable revert after using
+      revertBtn.disabled = true;
+      beforeSolveState = null;
+      beforeFixedCells = null;
+    });
+  }
 
   solveBtn.addEventListener('click', async ()=>{
     status.textContent = 'solving...';
@@ -149,18 +203,35 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     try {
       const input = getUint8ArrayFromState();
       // wasm-bindgen: Vec<u8> -> Uint8Array, Option<Vec<u8>> -> Uint8Array | undefined
+      // save state so revert can restore
+      beforeSolveState = new Uint8Array(gridState);
+      beforeFixedCells = Array.from(fixedCells);
+
       const out = mod.solve_wasm(input);
       if (out === undefined || out === null) {
         result.textContent = '解が見つかりませんでした。';
+        // no change, clear saved state
+        beforeSolveState = null;
+        beforeFixedCells = null;
       } else {
         // if returned a Uint8Array view (or JS array), convert
         let u8;
         if (out instanceof Uint8Array) u8 = out;
         else u8 = new Uint8Array(out);
         // convert 0-8 back to 1-9 for display
-        // update grid state and render
-        for (let i=0;i<81;i++) gridState[i] = (u8[i] === undefined ? 0 : u8[i]);
+        // update grid state and render; keep track of which cells were user-input (fixed)
+        for (let i=0;i<81;i++){
+          const val = (u8[i] === undefined ? 0 : u8[i]);
+          // do not overwrite user-input / fixed cells' fixed status
+          if (!fixedCells[i]){
+            gridState[i] = val;
+          } else {
+            gridState[i] = gridState[i] || val;
+          }
+        }
         renderGrid();
+        // enable revert: allow undoing solver-filled cells
+        if (revertBtn) revertBtn.disabled = false;
         result.textContent = formatOutput(gridState);
       }
       status.textContent = 'done';

@@ -15,3 +15,7 @@ pre#result{background:#f6f6f8;padding:12px;border-radius:6px}
 .cell.sub-border-right{border-right:3px solid #333}
 .cell.sub-border-bottom{border-bottom:3px solid #333}
 .cell.small{font-size:14px}
+
+/* fixed (入力済み) vs solved (自動で埋められた) */
+.cell.fixed{color:#000;font-weight:600}
+.cell.solved{color:#c33;font-weight:600}
