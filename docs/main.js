@@ -106,9 +106,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   // On GitHub Pages the site root is `docs/`; try pkg relative to the page
   const tryPaths = [
     './pkg/sudokurust.js',
-    'pkg/sudokurust.js',
-    // fallback for local dev servers that placed pkg next to project root
-    '../pkg/sudokurust.js'
   ];
 
   let mod;
