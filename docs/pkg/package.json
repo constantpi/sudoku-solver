@@ -1,0 +1,15 @@
+{
+  "name": "SudokuRust",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "sudokurust_bg.wasm",
+    "sudokurust.js",
+    "sudokurust.d.ts"
+  ],
+  "main": "sudokurust.js",
+  "types": "sudokurust.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
