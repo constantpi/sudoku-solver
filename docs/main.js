@@ -39,8 +39,12 @@ function renderGrid() {
     const cell = document.createElement('div');
     cell.className = 'cell';
     // thicker borders between 3x3 blocks
-    if ((i%9)%3 === 2 && (i%9) !== 8) cell.classList.add('sub-border-right');
-    if (Math.floor(i/9)%3 === 2 && Math.floor(i/9) !== 8) cell.classList.add('sub-border-bottom');
+    const col = i % 9;
+    const row = Math.floor(i / 9);
+    if (col % 3 === 2) cell.classList.add('sub-border-right');
+    if (col % 3 === 0 ) cell.classList.add('sub-border-left');
+    if (row % 3 === 2) cell.classList.add('sub-border-bottom');
+    if (row % 3 === 0) cell.classList.add('sub-border-top');
     cell.tabIndex = 0;
     cell.setAttribute('role','gridcell');
     cell.dataset.index = String(i);
