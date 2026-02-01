@@ -188,6 +188,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     // clear saved snapshot
     beforeSolveState = null;
     beforeFixedCells = null;
+    // re-enable solve after clearing
+    if (solveBtn) solveBtn.disabled = false;
   });
 
   if (revertBtn) {
@@ -204,11 +206,15 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       revertBtn.disabled = true;
       beforeSolveState = null;
       beforeFixedCells = null;
+      // re-enable solve after revert so user can re-run
+      if (solveBtn) solveBtn.disabled = false;
     });
   }
 
   solveBtn.addEventListener('click', async ()=>{
     status.textContent = 'solving...';
+    // disable solve to indicate it's been used
+    solveBtn.disabled = true;
     result.textContent = '...';
     try {
       const input = getUint8ArrayFromState();
@@ -225,6 +231,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         // no change, clear saved state
         beforeSolveState = null;
         beforeFixedCells = null;
+        // re-enable solve if solver returned no solution
+        if (solveBtn) solveBtn.disabled = false;
       } else {
         // if returned a Uint8Array view (or JS array), convert
         let u8;
@@ -251,6 +259,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       console.error(e);
       status.textContent = 'error';
       result.textContent = 'エラーが発生しました。コンソールを確認してください。';
+      // re-enable solve on error so user can try again
+      if (solveBtn) solveBtn.disabled = false;
     }
   });
 });
