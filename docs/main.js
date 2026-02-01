@@ -103,8 +103,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   status.textContent = 'loading wasm...';
 
-  // Try the actual generated pkg name to avoid harmless 404s in the console
+  // On GitHub Pages the site root is `docs/`; try pkg relative to the page
   const tryPaths = [
+    './pkg/sudokurust.js',
+    'pkg/sudokurust.js',
+    // fallback for local dev servers that placed pkg next to project root
     '../pkg/sudokurust.js'
   ];
 
