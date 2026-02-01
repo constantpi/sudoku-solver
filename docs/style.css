@@ -25,3 +25,12 @@ pre#result{background:#f6f6f8;padding:12px;border-radius:6px}
 /* fixed (入力済み) vs solved (自動で埋められた) */
 .cell.fixed{color:#000;font-weight:600}
 .cell.solved{color:#c33;font-weight:600}
+
+/* Mobile numeric keypad */
+.mobile-keypad{position:fixed;left:0;right:0;bottom:0;background:#fff;padding:8px;border-top:1px solid #e6e6e6;box-shadow:0 -6px 18px rgba(0,0,0,0.06);z-index:60}
+.mobile-keypad .key-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:520px;margin:0 auto;padding:0 8px}
+.keybtn{padding:10px 0;font-size:18px;border-radius:8px;border:1px solid #ccc;background:#f8f8f8;user-select:none}
+.keybtn:active{background:#e8e8eb}
+
+/* Add bottom padding to main so keypad doesn't cover content */
+main{padding-bottom:84px}

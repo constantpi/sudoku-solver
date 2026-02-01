@@ -129,6 +129,47 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   loadInitialFromTextarea();
   renderGrid();
 
+  // render mobile keypad for touch devices
+  function renderKeypad(){
+    const existing = document.getElementById('mobile-keypad');
+    if (existing) existing.remove();
+    const container = document.createElement('div');
+    container.id = 'mobile-keypad';
+    container.className = 'mobile-keypad';
+    const gridEl = document.createElement('div');
+    gridEl.className = 'key-grid';
+    const keys = [1,2,3,4,5,6,7,8,9,'del'];
+    keys.forEach(k => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'keybtn';
+      btn.dataset.key = String(k);
+      btn.textContent = k === 'del' ? '⌫' : String(k);
+      const handler = (e) => {
+        e.preventDefault();
+        if (selectedIndex === null) return;
+        if (k === 'del') {
+          gridState[selectedIndex] = 0;
+          fixedCells[selectedIndex] = false;
+        } else {
+          gridState[selectedIndex] = Number(k);
+          fixedCells[selectedIndex] = true;
+        }
+        renderGrid();
+        selectCell(selectedIndex);
+      };
+      btn.addEventListener('click', handler);
+      btn.addEventListener('touchstart', handler, {passive:false});
+      gridEl.appendChild(btn);
+    });
+    container.appendChild(gridEl);
+    const main = document.querySelector('main') || document.body;
+    main.appendChild(container);
+  }
+
+  // add mobile keypad to page
+  renderKeypad();
+
   // keyboard handling: arrow navigation, digits, Esc
   document.addEventListener('keydown', (ev)=>{
     if (selectedIndex === null) return;
