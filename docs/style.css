@@ -12,10 +12,10 @@ textarea{font-family: monospace; font-size:16px}
 pre#result{background:#f6f6f8;padding:12px;border-radius:6px}
 
 /* Grid styles */
-#grid{display:grid;grid-template-columns:repeat(9,36px);grid-template-rows:repeat(9,36px);gap:2px;margin-top:8px}
+#grid{display:grid;grid-template-columns:repeat(9,36px);grid-template-rows:repeat(9,36px);gap:0;margin-top:8px}
 .cell{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:monospace;background:#fff;border:1px solid #ccc;cursor:pointer;user-select:none}
 .cell:focus{outline:2px solid #267;}
-.cell.selected{background:#def}
+.cell.selected{background:#def; position:relative; z-index:2}
 .cell.sub-border-right{border-right:3px solid #333}
 .cell.sub-border-left{border-left:3px solid #333}
 .cell.sub-border-bottom{border-bottom:3px solid #333}

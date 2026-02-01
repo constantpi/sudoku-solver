@@ -41,10 +41,10 @@ function renderGrid() {
     // thicker borders between 3x3 blocks
     const col = i % 9;
     const row = Math.floor(i / 9);
-    if (col % 3 === 2) cell.classList.add('sub-border-right');
     if (col % 3 === 0 ) cell.classList.add('sub-border-left');
-    if (row % 3 === 2) cell.classList.add('sub-border-bottom');
+    if (col === 8 ) cell.classList.add('sub-border-right');
     if (row % 3 === 0) cell.classList.add('sub-border-top');
+    if (row === 8) cell.classList.add('sub-border-bottom');
     cell.tabIndex = 0;
     cell.setAttribute('role','gridcell');
     cell.dataset.index = String(i);
