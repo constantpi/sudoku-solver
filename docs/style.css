@@ -2,8 +2,10 @@ body{font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue"
 main{max-width:520px;margin:0 auto}
 
 textarea{font-family: monospace; font-size:16px}
+#controls{margin-top:8px}
 .controls{margin-top:8px}
-#solve, #clear{padding:8px 12px}
+/* Make all control buttons visually consistent */
+#solve, #clear, #revert{padding:8px 12px; min-height:36px; line-height:20px}
 #status{margin-left:12px;color:#666}
 pre#result{background:#f6f6f8;padding:12px;border-radius:6px}
 

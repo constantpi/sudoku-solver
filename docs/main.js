@@ -181,6 +181,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     selectedIndex = null;
     // disable revert because there's nothing to revert
     if (revertBtn) revertBtn.disabled = true;
+    // clear saved snapshot
+    beforeSolveState = null;
+    beforeFixedCells = null;
   });
 
   if (revertBtn) {
@@ -190,6 +193,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       gridState = new Uint8Array(beforeSolveState);
       fixedCells = beforeFixedCells ? Array.from(beforeFixedCells) : new Array(81).fill(false);
       renderGrid();
+      // update UI: show restored state and disable revert
+      if (typeof status !== 'undefined' && status) status.textContent = 'reverted';
+      if (typeof result !== 'undefined' && result) result.textContent = formatOutput(gridState);
       // disable revert after using
       revertBtn.disabled = true;
       beforeSolveState = null;
@@ -203,9 +209,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     try {
       const input = getUint8ArrayFromState();
       // wasm-bindgen: Vec<u8> -> Uint8Array, Option<Vec<u8>> -> Uint8Array | undefined
-      // save state so revert can restore
-      beforeSolveState = new Uint8Array(gridState);
-      beforeFixedCells = Array.from(fixedCells);
+      // save state so revert can restore (only if not already saved)
+      if (!beforeSolveState) {
+        beforeSolveState = new Uint8Array(gridState);
+        beforeFixedCells = Array.from(fixedCells);
+      }
 
       const out = mod.solve_wasm(input);
       if (out === undefined || out === null) {
