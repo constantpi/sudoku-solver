@@ -24,7 +24,8 @@ fn main() {
                 .try_into()
                 .unwrap();
             let board = board::Board::new(input);
-            if let Some(solved_board) = solve(board) {
+            let mut call_cnt = 0;
+            if let Some(solved_board) = solve(board, &mut call_cnt) {
                 println!("Solved board:\n{}", solved_board);
             } else {
                 println!("No solution found for {:?}", path);
