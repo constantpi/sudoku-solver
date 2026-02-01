@@ -55,17 +55,24 @@ pub fn solve_wasm(input: Vec<u8>) -> SolveResult {
             .collect::<Vec<Option<u8>>>()
             .try_into()
             .unwrap();
-        let board = Board::new(board_input);
-        let mut call_cnt = 0;
-        if let Some(solved_board) = solve(board, &mut call_cnt) {
-            SolveResult {
-                board: solved_board.to_vec(),
-                call_cnt,
+        // let board = Board::new(board_input);
+        if let Some(board) = Board::new(board_input) {
+            let mut call_cnt = 0;
+            if let Some(solved_board) = solve(board, &mut call_cnt) {
+                SolveResult {
+                    board: solved_board.to_vec(),
+                    call_cnt,
+                }
+            } else {
+                SolveResult {
+                    board: None,
+                    call_cnt,
+                }
             }
         } else {
             SolveResult {
                 board: None,
-                call_cnt,
+                call_cnt: 0,
             }
         }
     }

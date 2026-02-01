@@ -46,7 +46,7 @@ pub struct Board {
 impl Board {
     /// 新しい空の盤面を作成する
     /// input: 各セルの初期値を表す配列。Noneは空セル、Some(n)は数字nが入っているセルを表す。0~8の範囲内であることを仮定する。
-    pub fn new(input: [Option<u8>; 81]) -> Self {
+    pub fn new(input: [Option<u8>; 81]) -> Option<Self> {
         let cells = input
             .iter()
             .enumerate()
@@ -67,7 +67,8 @@ impl Board {
             .collect::<Vec<Cell>>()
             .try_into()
             .unwrap();
-        Board { cells }
+        let board = Board { cells };
+        if board.is_valid() { Some(board) } else { None }
     }
 
     pub fn is_valid(&self) -> bool {

@@ -24,11 +24,15 @@ fn main() {
                 .try_into()
                 .unwrap();
             let board = board::Board::new(input);
-            let mut call_cnt = 0;
-            if let Some(solved_board) = solve(board, &mut call_cnt) {
-                println!("Solved board:\n{}", solved_board);
+            if let Some(board) = board {
+                let mut call_cnt = 0;
+                if let Some(solved_board) = solve(board, &mut call_cnt) {
+                    println!("Solved board:\n{}", solved_board);
+                } else {
+                    println!("No solution found for {:?}", path);
+                }
             } else {
-                println!("No solution found for {:?}", path);
+                println!("Invalid board in {:?}", path);
             }
         }
     }
