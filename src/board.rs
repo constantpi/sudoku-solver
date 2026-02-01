@@ -115,6 +115,29 @@ impl Board {
             self.cells[related_idx].reduce_candidate(num);
         }
     }
+
+    pub fn to_vec(&self) -> Option<Vec<u8>> {
+        // 一つでも空セルがあればNoneを返す
+        if self
+            .cells
+            .iter()
+            .any(|cell| matches!(cell, Cell::Candidate(_, _)))
+        {
+            None
+        } else {
+            Some(
+                self.cells
+                    .iter()
+                    .map(|cell| match cell {
+                        Cell::Number(num) => *num + 1,
+                        Cell::Candidate(_, _) => {
+                            unreachable!("Empty cell found in to_vec")
+                        }
+                    })
+                    .collect(),
+            )
+        }
+    }
 }
 
 /// Boardを表示するためのフォーマットを実装
